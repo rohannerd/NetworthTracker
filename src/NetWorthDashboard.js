@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
-import { Plus, Wallet, TrendingUp, Database, BarChart3, IndianRupee } from 'lucide-react';
+import { Plus, Wallet, TrendingUp, TrendingDown, Database, BarChart3, IndianRupee } from 'lucide-react';
 import { Card, CardContent, CardHeader, Button, Dialog, DialogContent, DialogTitle, TextField, Alert, Typography, Grid, Box, Container } from '@mui/material';
 import { motion } from 'framer-motion';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
@@ -247,6 +248,12 @@ const NetWorthDashboard = () => {
     }).format(value);
   };
 
+// Add this after your existing utility functions
+const calculatePercentageChange = (currentValue, previousValue) => {
+  if (!previousValue) return null;
+  return ((currentValue - previousValue) / previousValue) * 100;
+};
+
   if (!hasInitialData) {
     return (
       <ThemeProvider theme={theme}>
@@ -454,9 +461,52 @@ const NetWorthDashboard = () => {
             <Grid item xs={12}>
               <Card sx={{ p: 3 }}>
                 <Typography variant="h6" color="text.secondary">Total Net Worth</Typography>
-                <Typography variant="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
-                  {formatCurrency(networthData[networthData.length - 1].networth)}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    {formatCurrency(networthData[networthData.length - 1].networth)}
+                  </Typography>
+                  {networthData.length > 1 && (
+                    <Box
+                      component={motion.div}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        px: 2,
+                        py: 1,
+                        borderRadius: 2,
+                        backgroundColor: (theme) => alpha(
+                          networthData[networthData.length - 1].networth > networthData[networthData.length - 2].networth 
+                            ? '#10B981' 
+                            : '#EF4444',
+                          0.1
+                        ),
+                      }}
+                    >
+                      {networthData[networthData.length - 1].networth > networthData[networthData.length - 2].networth ? (
+                        <TrendingUp size={20} style={{ color: '#10B981' }} />
+                      ) : (
+                        <TrendingDown size={20} style={{ color: '#EF4444' }} />
+                      )}
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 600,
+                          color: networthData[networthData.length - 1].networth > networthData[networthData.length - 2].networth 
+                            ? '#10B981' 
+                            : '#EF4444'
+                        }}
+                      >
+                        {Math.abs(calculatePercentageChange(
+                          networthData[networthData.length - 1].networth,
+                          networthData[networthData.length - 2].networth
+                        )).toFixed(1)}%
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
                 <Grid container spacing={3} sx={{ mt: 2 }}>
                   {ASSETS.map(asset => (
                     <Grid item xs={12} sm={6} md={3} key={asset.key}>
