@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../AuthContext';
 import { authModalStyles } from '../../theme/authModalStyles';
+import { useNavigate } from 'react-router-dom';
 
 export default function Register({ onToggleAuth }) {
   const [email, setEmail] = useState('');
@@ -18,6 +19,7 @@ export default function Register({ onToggleAuth }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -34,6 +36,7 @@ export default function Register({ onToggleAuth }) {
       setError('');
       setLoading(true);
       await signup(email, password);
+      navigate('/onboarding');
     } catch (error) {
       console.error('Registration error:', error);
       setError(

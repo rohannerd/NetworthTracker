@@ -13,6 +13,7 @@ import {
 import { Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function AuthModal() {
   const { authModalOpen, authMode, closeAuthModal, login, signup } = useAuth();
@@ -22,6 +23,12 @@ export default function AuthModal() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const checkUserData = () => {
+    const savedData = localStorage.getItem('networthData');
+    return savedData ? JSON.parse(savedData).length > 0 : false;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,10 +41,16 @@ export default function AuthModal() {
           throw new Error('Passwords do not match');
         }
         await signup(email, password);
+        closeAuthModal();
+        // New users always go to onboarding
+        navigate('/onboarding');
       } else {
         await login(email, password);
+        closeAuthModal();
+        // Existing users: check if they have data
+        const hasData = checkUserData();
+        navigate(hasData ? '/dashboard' : '/onboarding');
       }
-      closeAuthModal();
     } catch (err) {
       setError(err.message);
     } finally {

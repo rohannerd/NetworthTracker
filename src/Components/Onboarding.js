@@ -8,8 +8,10 @@ import {
   Card,
 } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Onboarding = ({ onComplete }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     stocks: '',
     mutualFunds: '',
@@ -45,7 +47,11 @@ const Onboarding = ({ onComplete }) => {
       networth: totalNetWorth
     };
 
-    onComplete(initialData);
+    // Save to localStorage
+    localStorage.setItem('networthData', JSON.stringify([initialData]));
+    
+    // Navigate to dashboard after saving data
+    navigate('/dashboard');
   };
 
   return (

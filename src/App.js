@@ -4,7 +4,7 @@ import Landing from './Components/Landing';
 import Onboarding from './Components/Onboarding';
 import NetWorthDashboard from './NetWorthDashboard';
 import AuthModal from './Components/Auth/AuthModal';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -52,6 +52,16 @@ const AuthWrapper = () => {
   return <NetWorthDashboard />;
 };
 
+function RequireAuth({ children }) {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/" />;
+  }
+  
+  return children;
+}
+
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
@@ -59,7 +69,16 @@ const App = () => {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/dashboard" element={<NetWorthDashboard />} />
+            <Route path="/onboarding" element={
+              <RequireAuth>
+                <Onboarding />
+              </RequireAuth>
+            } />
+            <Route path="/dashboard" element={
+              <RequireAuth>
+                <NetWorthDashboard />
+              </RequireAuth>
+            } />
           </Routes>
           <AuthModal />
         </AuthProvider>
