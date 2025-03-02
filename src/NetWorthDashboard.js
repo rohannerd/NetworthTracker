@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
-import { Plus, Wallet, TrendingUp, TrendingDown, Database, BarChart3, IndianRupee } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown } from 'lucide-react'; // Remove unused icons
 import { Card, CardContent, CardHeader, Button, Dialog, DialogContent, DialogTitle, TextField, Alert, Typography, Grid, Box, Container } from '@mui/material';
 import { motion } from 'framer-motion';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { alpha } from '@mui/material/styles';
+import { useAuth } from './Components/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
@@ -20,83 +22,95 @@ const theme = createTheme({
       dark: '#BE185D',
     },
     background: {
-      default: '#0F172A',
-      paper: 'rgba(255, 255, 255, 0.05)',
+      default: '#030711', // Darker background like landing page
+      paper: '#2A3852',   // Match login modal background
     },
     text: {
       primary: '#FFFFFF',
       secondary: 'rgba(255, 255, 255, 0.7)',
     },
   },
-  shape: {
-    borderRadius: 16,
-  },
   components: {
     MuiCard: {
       styleOverrides: {
         root: {
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backgroundColor: '#2A3852',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '24px',
+          boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8)',
         },
       },
     },
     MuiButton: {
       styleOverrides: {
-        root: {
-          textTransform: 'none',
-          padding: '10px 20px',
-        },
         contained: {
           background: 'linear-gradient(45deg, #7C3AED 30%, #EC4899 90%)',
-          boxShadow: '0 3px 5px 2px rgba(124, 58, 237, .3)',
+          fontSize: '0.95rem',
+          fontWeight: 500,
+          textTransform: 'none',
+          boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
           '&:hover': {
-            background: 'linear-gradient(45deg, #5B21B6 30%, #BE185D 90%)',
-          },
+            background: 'linear-gradient(45deg, #6D28D9 30%, #DB2777 90%)',
+            boxShadow: '0 6px 16px rgba(124, 58, 237, 0.4)',
+            transform: 'translateY(-1px)'
+          }
         },
-      },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '24px',
-          padding: '24px',
+        outlined: {
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'white',
+          '&:hover': {
+            borderColor: 'rgba(255, 255, 255, 0.3)',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)'
+          }
         }
-      }
+      },
     },
     MuiTextField: {
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
+            height: '48px',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '8px',
             '& fieldset': {
-              borderColor: 'rgba(255, 255, 255, 0.1)',
+              border: 'none'
             },
-            '&:hover fieldset': {
-              borderColor: '#7C3AED',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.2)'
             },
-            '&.Mui-focused fieldset': {
-              borderColor: '#7C3AED',
-            },
-          },
-          '& .MuiInputLabel-root': {
-            color: 'rgba(255, 255, 255, 0.7)',
+            '&.Mui-focused': {
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              border: '2px solid #7C3AED'
+            }
           },
           '& .MuiOutlinedInput-input': {
-            color: '#FFFFFF',
-          },
-        },
-      },
-    },
-  },
+            color: '#fff',
+            '&::placeholder': {
+              color: 'rgba(255, 255, 255, 0.5)',
+              opacity: 1
+            }
+          }
+        }
+      }
+    }
+  }
 });
 
 const NetWorthDashboard = () => {
+  const { logout } = useAuth(); // Remove user if not being used
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  };
+
   // Initialize hasInitialData from localStorage
   const [hasInitialData, setHasInitialData] = useState(() => {
     const savedData = localStorage.getItem('networthData');
@@ -254,309 +268,77 @@ const calculatePercentageChange = (currentValue, previousValue) => {
   return ((currentValue - previousValue) / previousValue) * 100;
 };
 
-// Update the landing page container styles
-if (!hasInitialData) {
-  return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0F172A 0%, #312E81 100%)',
-        overflowX: 'hidden', // Prevent horizontal scroll
-        width: '100%'
-      }}>
-        <Container maxWidth={false} sx={{ 
-          p: { xs: 2, sm: 4 },
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          overflowY: 'auto' // Enable vertical scroll
-        }}>
-          <Box sx={{ 
-            textAlign: 'center',
-            py: { xs: 4, md: 8 }, // Adjust padding for mobile
-            mt: { xs: 2, md: 4 }
-          }}>
-            {/* Update typography for better mobile view */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Typography variant="h1" sx={{
-                fontSize: { 
-                  xs: '2rem',    // Mobile
-                  sm: '2.5rem',  // Tablet
-                  md: '4rem'     // Desktop
-                },
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #7C3AED 30%, #EC4899 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: { xs: 2, md: 3 },
-                px: { xs: 1, md: 0 }
-              }}>
-                Track Your Wealth Journey
-              </Typography>
-              <Typography variant="h5" sx={{ 
-                color: 'rgba(255, 255, 255, 0.7)',
-                mb: { xs: 4, md: 8 },
-                fontSize: { xs: '1.1rem', md: '1.5rem' },
-                px: { xs: 1, md: 0 }
-              }}>
-                Your personal net worth dashboard with comprehensive investment tracking
-              </Typography>
-            </motion.div>
-
-            {/* Update feature cards grid */}
-            <Grid container spacing={3} sx={{ mb: { xs: 4, md: 8 } }}>
-              <Grid item xs={12} md={4}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 * 0 }}
-                >
-                  <Card sx={{
-                    p: 4,
-                    height: '100%',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                    }
-                  }}>
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 2,
-                    }}>
-                      <Wallet size={48} style={{ color: '#7C3AED' }} />
-                      <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
-                        Track Assets
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Monitor all your investments in one place
-                      </Typography>
-                    </Box>
-                  </Card>
-                </motion.div>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 * 1 }}
-                >
-                  <Card sx={{
-                    p: 4,
-                    height: '100%',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                    }
-                  }}>
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 2,
-                    }}>
-                      <BarChart3 size={48} style={{ color: '#7C3AED' }} />
-                      <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
-                        Visualize Growth
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        See your wealth grow over time
-                      </Typography>
-                    </Box>
-                  </Card>
-                </motion.div>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 * 2 }}
-                >
-                  <Card sx={{
-                    p: 4,
-                    height: '100%',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                    }
-                  }}>
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 2,
-                    }}>
-                      <Database size={48} style={{ color: '#7C3AED' }} />
-                      <Typography variant="h6" sx={{ color: '#fff', fontWeight: 'bold' }}>
-                        Smart Insights
-                      </Typography>
-                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        Get insights about your portfolio
-                      </Typography>
-                    </Box>
-                  </Card>
-                </motion.div>
-              </Grid>
-            </Grid>
-
-            {/* Update CTA button */}
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => setIsDialogOpen(true)}
-              startIcon={<Plus />}
-              sx={{
-                py: { xs: 1.5, md: 2 },
-                px: { xs: 4, md: 6 },
-                borderRadius: '50px',
-                fontSize: { xs: '1rem', md: '1.1rem' },
-                mb: { xs: 4, md: 0 }
-              }}
-            >
-              Start Tracking Your Net Worth
-            </Button>
-          </Box>
-        </Container>
-
-        {/* Update Dialog for mobile */}
-        <Dialog
-          open={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{
-            sx: {
-              m: { xs: 2, sm: 4 },
-              width: { xs: 'calc(100% - 32px)', sm: 'auto' }
-            }
-          }}
-        >
-          <DialogContent>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Typography variant="h4" sx={{
-                fontWeight: 'bold',
-                mb: 4,
-                background: 'linear-gradient(45deg, #7C3AED 30%, #EC4899 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}>
-                Enter Your Assets
-              </Typography>
-
-              <Grid container spacing={3}>
-                {ASSETS.map((asset) => (
-                  <Grid item xs={12} sm={6} key={asset.key}>
-                    <TextField
-                      fullWidth
-                      label={asset.label}
-                      name={asset.key}
-                      value={formData[asset.key]}
-                      onChange={handleInputChange}
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <Box sx={{ color: '#7C3AED', mr: 1 }}>
-                            <IndianRupee size={20} />
-                          </Box>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-
-              {errors.form && (
-                <Alert severity="error" sx={{ mt: 3 }}>
-                  {errors.form}
-                </Alert>
-              )}
-
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={handleSubmit}
-                sx={{ mt: 4, py: 1.5 }}
-              >
-                Start Tracking
-              </Button>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </ThemeProvider>
-  );
-}
-
 // Update the dashboard container styles
 return (
   <ThemeProvider theme={theme}>
     <Box sx={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0F172A 0%, #312E81 100%)',
-      p: { xs: 2, md: 4 }, // Adjust padding for mobile
-      overflowX: 'hidden'  // Prevent horizontal scroll
+      background: 'linear-gradient(135deg, #030711 0%, #1E293B 100%)',
+      position: 'relative',
+      overflow: 'hidden',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        background: 'radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.1), transparent 70%)',
+        pointerEvents: 'none'
+      }
     }}>
-      <Container maxWidth="xl" sx={{ 
-        mb: { xs: 2, md: 4 }  // Add bottom margin for mobile
-      }}>
-        {/* Update header for mobile */}
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 5 } }}>
+        {/* Update header styling */}
         <Box sx={{ 
           display: 'flex', 
           flexDirection: { xs: 'column', sm: 'row' },
-          gap: { xs: 2, sm: 0 },
           justifyContent: 'space-between', 
           alignItems: { xs: 'stretch', sm: 'center' },
-          mb: { xs: 3, md: 4 }
+          mb: { xs: 4, md: 5 },
+          gap: 3
         }}>
-          <Typography variant="h4" sx={{
-            fontSize: { xs: '1.75rem', md: '2.125rem' },
-            textAlign: { xs: 'center', sm: 'left' },
-            color: 'white',
-            fontWeight: 'bold',
-            letterSpacing: '0.5px',
-            textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            background: 'linear-gradient(45deg, #fff 30%, rgba(255,255,255,0.9) 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.2))'
-          }}>
-            Net Worth Dashboard
-          </Typography>
-          <Button
-            fullWidth={false}
-            variant="contained"
-            onClick={() => setIsDialogOpen(true)}
-            startIcon={<Plus />}
-            sx={{ 
-              px: 3,
-              width: { xs: '100%', sm: 'auto' }
+          <Typography 
+            variant="h4" 
+            sx={{
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              fontWeight: 700,
+              background: 'linear-gradient(to right, #fff, #a9c2ff)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: { xs: 2, sm: 0 }
             }}
           >
-            Add New Data
-          </Button>
+            Net Worth Dashboard
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            width: { xs: '100%', sm: 'auto' }
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => setIsDialogOpen(true)}
+              startIcon={<Plus />}
+              sx={{
+                height: '48px',
+                px: 3
+              }}
+            >
+              Add New Data
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleLogout}
+              sx={{
+                height: '48px',
+                px: 3
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
         </Box>
 
-        {/* Update grid spacing for mobile */}
-        <Grid container spacing={{ xs: 2, md: 4 }}>
+        {/* Update Grid spacing and card styling */}
+        <Grid container spacing={3}>
           {/* Total Net Worth Card */}
           <Grid item xs={12}>
             <Card sx={{ p: 3 }}>
@@ -823,10 +605,12 @@ return (
           maxWidth="sm"
           PaperProps={{
             sx: {
-              m: { xs: 2, sm: 4 },
-              width: { xs: 'calc(100% - 32px)', sm: 'auto' },
-              maxHeight: { xs: '90vh', sm: '80vh' },
-              overflowY: 'auto'
+              backgroundColor: '#2A3852',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '24px',
+              boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8)',
+              p: 3
             }
           }}
         >
