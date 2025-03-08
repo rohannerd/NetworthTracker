@@ -1,3 +1,4 @@
+// src/Components/Auth/Login.js
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -13,7 +14,7 @@ import {
 import { Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../AuthContext';
-import { authModalStyles } from '../../theme/authModalStyles.js'; // Corrected path
+import { authModalStyles } from '../../theme/authModalStyles.js';
 
 export default function Login({ isOpen, onClose, onToggleAuth }) {
   const { login } = useAuth();
@@ -29,6 +30,7 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
     setError('');
     try {
       await login(email, password);
+      onClose(); // Close modal after successful login (navigation handled by AuthContext)
     } catch (error) {
       setError('Invalid email or password');
       console.error('Login failed:', error);

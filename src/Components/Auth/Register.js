@@ -1,3 +1,4 @@
+// src/Components/Auth/Register.js
 import React, { useState } from 'react';
 import {
   Box,
@@ -9,8 +10,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { authModalStyles } from '../../theme/authModalStyles.js'; // Corrected path
+import { authModalStyles } from '../../theme/authModalStyles.js';
 
 export default function Register({ onToggleAuth }) {
   const [email, setEmail] = useState('');
@@ -19,7 +19,6 @@ export default function Register({ onToggleAuth }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
-  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -41,8 +40,7 @@ export default function Register({ onToggleAuth }) {
       console.log('Initiating signup with:', { email, password });
       const user = await signup(email, password);
       console.log('Signup completed for user:', user.uid);
-      console.log('Navigating to /onboarding');
-      navigate('/onboarding');
+      // Navigation is handled by AuthContext after signup
     } catch (error) {
       console.error('Registration error:', error.code, error.message);
       setError(

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/Components/Landing.js
+import React from 'react';
 import { 
   AppBar,
   Box, 
@@ -8,26 +9,27 @@ import {
   Dialog,
   Toolbar,
   DialogContent,
-  IconButton,
   Link
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
 import Login from './Auth/Login';
 import Register from './Auth/Register';
-import { useAuth } from '../Components/AuthContext'; // Updated import path
+import { useAuth } from '../Components/AuthContext';
 
 export default function Landing() {
-  const { openAuthModal } = useAuth();
-
+  const { openAuthModal, authModalOpen, authMode, closeAuthModal } = useAuth();
   const navLinks = ['Features', 'Pricing', 'About', 'Resources'];
+
+  // Define onToggleAuth to switch between login and signup modes
+  const onToggleAuth = (mode) => {
+    openAuthModal(mode);
+  };
 
   return (
     <Box sx={{ 
       minHeight: '100vh', 
-      background: '#030711' // Darker background for better contrast
+      background: '#030711' 
     }}>
-      {/* Modern Navbar with Links */}
       <AppBar 
         position="fixed" 
         elevation={0} 
@@ -45,7 +47,6 @@ export default function Landing() {
             WealthTrack
           </Typography>
 
-          {/* Navigation Links */}
           <Box sx={{ 
             display: { xs: 'none', md: 'flex' }, 
             gap: 4,
@@ -71,7 +72,6 @@ export default function Landing() {
             ))}
           </Box>
           
-          {/* Auth Buttons */}
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button 
               variant="outlined"
@@ -115,7 +115,6 @@ export default function Landing() {
         </Toolbar>
       </AppBar>
 
-      {/* Hero Section */}
       <Box sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -123,7 +122,6 @@ export default function Landing() {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Background Gradient */}
         <Box sx={{
           position: 'absolute',
           top: 0,
@@ -219,6 +217,29 @@ export default function Landing() {
           </Box>
         </Container>
       </Box>
+
+      <Dialog
+        open={authModalOpen}
+        onClose={closeAuthModal}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          backdrop: {
+            sx: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              backdropFilter: 'blur(12px)',
+            },
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          {authMode === 'login' ? (
+            <Login onToggleAuth={onToggleAuth} />
+          ) : (
+            <Register onToggleAuth={onToggleAuth} />
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
