@@ -27,10 +27,12 @@ import {
   AreaChart,
   Area,
   ResponsiveContainer,
-  PieChart,  // Added
-  Pie,      // Added
-  Cell,     // Added
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
+import { db } from './Components/Firebase'; // Updated path to match src/Components/Firebase.js
+import { doc, setDoc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const NetWorthDashboard = () => {
   const { user, logout } = useAuth();
@@ -38,11 +40,8 @@ const NetWorthDashboard = () => {
   const [networthData, setNetworthData] = useState([]);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openGoalModal, setOpenGoalModal] = useState(false);
-  const [goal, setGoal] = useState(() => {
-    const savedGoal = localStorage.getItem('networthGoal');
-    console.log('Initial goal from localStorage:', savedGoal);
-    return savedGoal ? parseFloat(savedGoal) : 0;
-  });
+  const [error, setError] = useState(null);
+  const [goal, setGoal] = useState(0);
 
   // Calculate dynamic Y-axis ticks based on networthData
   const getDynamicTicks = (data) => {
@@ -50,7 +49,7 @@ const NetWorthDashboard = () => {
     const maxNetWorth = Math.max(...data.map(entry => entry.networth || 0));
     const minNetWorth = Math.min(...data.map(entry => entry.networth || 0));
     const range = maxNetWorth - minNetWorth;
-    const step = Math.pow(10, Math.floor(Math.log10(range / 5))) || 1000; // Dynamic step size (e.g., 1000, 100)
+    const step = Math.pow(10, Math.floor(Math.log10(range / 5))) || 1000;
     const ticks = [];
     for (let i = 0; i <= Math.ceil(maxNetWorth / step); i++) {
       ticks.push(i * step);
@@ -58,12 +57,35 @@ const NetWorthDashboard = () => {
     return ticks;
   };
 
+  // Fetch networthData and networthGoal from Firestore
   useEffect(() => {
-    const savedData = localStorage.getItem('networthData');
-    if (savedData) {
-      setNetworthData(JSON.parse(savedData));
-    }
-  }, []);
+    const fetchData = async () => {
+      if (!user) return;
+      try {
+        // Fetch networthData
+        const networthCollectionRef = collection(db, `users/${user.uid}/networthData`);
+        const q = query(networthCollectionRef, orderBy('date'));
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setNetworthData(data);
+
+        // Fetch networthGoal
+        const goalDocRef = doc(db, `users/${user.uid}/settings/networthGoal`);
+        const goalDoc = await getDoc(goalDocRef);
+        if (goalDoc.exists()) {
+          setGoal(parseFloat(goalDoc.data().value) || 0);
+        }
+      } catch (err) {
+        setError('Error loading data from database.');
+        console.error('Error fetching data from Firestore:', err);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -78,25 +100,38 @@ const NetWorthDashboard = () => {
     setOpenUpdateModal(true);
   };
 
-  const handleUpdateComplete = (updatedData) => {
+  const handleUpdateComplete = async (updatedData) => {
     const newEntry = {
       date: new Date().toISOString(),
       ...updatedData,
       networth: Object.values(updatedData).reduce((sum, value) => sum + (parseFloat(value) || 0), 0),
     };
     const updatedNetworthData = [...networthData, newEntry];
-    localStorage.setItem('networthData', JSON.stringify(updatedNetworthData));
-    setNetworthData(updatedNetworthData);
+    try {
+      // Save to Firestore under user's UID
+      const networthCollectionRef = collection(db, `users/${user.uid}/networthData`);
+      await setDoc(doc(networthCollectionRef), newEntry);
+      setNetworthData(updatedNetworthData);
+    } catch (err) {
+      setError('Error saving data to database.');
+      console.error('Error saving networthData to Firestore:', err);
+    }
     setOpenUpdateModal(false);
   };
 
-  const handleSetGoal = (e) => {
+  const handleSetGoal = async (e) => {
     e.preventDefault();
     const goalValue = parseFloat(e.target.goal.value) || 0;
     if (goalValue > 0) {
       setGoal(goalValue);
-      localStorage.setItem('networthGoal', goalValue.toString());
-      console.log('Goal set to:', goalValue);
+      try {
+        // Save to Firestore under user's UID
+        const goalDocRef = doc(db, `users/${user.uid}/settings/networthGoal`);
+        await setDoc(goalDocRef, { value: goalValue });
+      } catch (err) {
+        setError('Error saving goal to database.');
+        console.error('Error saving networthGoal to Firestore:', err);
+      }
     }
     setOpenGoalModal(false);
   };
@@ -104,7 +139,6 @@ const NetWorthDashboard = () => {
   const latestData = networthData[networthData.length - 1] || {};
   const totalNetWorth = latestData.networth || 0;
   const progress = goal > 0 ? Math.min((totalNetWorth / goal) * 100, 100) : 0;
-  const remaining = goal > 0 ? Math.max(goal - totalNetWorth, 0) : 0;
 
   const assetData = [
     { name: 'Stocks', value: latestData.stocks || 0 },
@@ -118,7 +152,7 @@ const NetWorthDashboard = () => {
 
   const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
 
-  const chartData = networthData.map((entry, index) => ({
+  const chartData = networthData.map((entry) => ({
     date: new Date(entry.date).toLocaleDateString(),
     networth: entry.networth,
   }));
@@ -219,6 +253,13 @@ const NetWorthDashboard = () => {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ mt: 10 }}>
+        {error && (
+          <Box sx={{ mb: 2, textAlign: 'center' }}>
+            <Typography sx={{ color: '#EF4444', fontSize: '1rem' }}>
+              {error}
+            </Typography>
+          </Box>
+        )}
         <Typography variant="h4" sx={{
           mb: 4,
           background: 'linear-gradient(to right, #fff, #a9c2ff)',
@@ -282,7 +323,6 @@ const NetWorthDashboard = () => {
                       left: 0,
                     }}
                   />
-                  {/* Circular Indicator */}
                   <motion.div
                     initial={{ left: '0%' }}
                     animate={{ left: `calc(${progress}% - 15px)` }}
@@ -308,7 +348,6 @@ const NetWorthDashboard = () => {
                       {progress.toFixed(0)}%
                     </Typography>
                   </motion.div>
-                  {/* Percentage Markers */}
                   {[0, 25, 50, 75, 100].map((percent) => (
                     <Box
                       key={percent}
@@ -431,7 +470,7 @@ const NetWorthDashboard = () => {
                       <YAxis
                         stroke="rgba(255, 255, 255, 0.5)"
                         tick={{ fontSize: 12 }}
-                        domain={[0, (dataMax) => Math.ceil(dataMax * 1.1)]} // Add 10% buffer
+                        domain={[0, (dataMax) => Math.ceil(dataMax * 1.1)]}
                         ticks={dynamicTicks}
                         label={{
                           value: 'Net Worth (₹)',
@@ -507,7 +546,6 @@ const NetWorthDashboard = () => {
                         label={({ name, percent }) =>
                           percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : null
                         }
-                        labelStyle={{ fill: '#FFFFFF', fontSize: 12 }}
                       >
                         {assetData.map((entry, index) => (
                           <Cell

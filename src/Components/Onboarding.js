@@ -12,12 +12,16 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import { authModalStyles } from '../theme/authModalStyles.js';
 import { TrendingUp, Savings, CurrencyBitcoin } from '@mui/icons-material';
+import { auth, db } from './Firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const Onboarding = ({ onComplete }) => {
-  const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const { user } = useAuth(); // Hook called unconditionally
+  const navigate = useNavigate(); // Hook called unconditionally
+  const [step, setStep] = useState(0); // Hook called unconditionally
   const [formData, setFormData] = useState({
     stocks: '',
     mutualFunds: '',
@@ -26,8 +30,15 @@ const Onboarding = ({ onComplete }) => {
     savings: '',
     ppf: '',
     crypto: '',
-  });
-  const [showCelebration, setShowCelebration] = useState(false);
+  }); // Hook called unconditionally
+  const [showCelebration, setShowCelebration] = useState(false); // Hook called unconditionally
+  const [error, setError] = useState(null); // Hook called unconditionally
+
+  // Handle navigation if not authenticated
+  if (!user) {
+    navigate('/login'); // Redirect to login if not authenticated
+    return null; // Return early, but hooks are already called
+  }
 
   const fields = [
     { name: 'stocks', label: 'Stocks', icon: <TrendingUp /> },
@@ -62,7 +73,7 @@ const Onboarding = ({ onComplete }) => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newValues = {};
     let totalNetWorth = 0;
 
@@ -78,11 +89,24 @@ const Onboarding = ({ onComplete }) => {
       networth: totalNetWorth,
     };
 
-    localStorage.setItem('networthData', JSON.stringify([initialData]));
-    setShowCelebration(true);
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 2000);
+    try {
+      const user = auth.currentUser; // This should now always be valid
+      if (!user) {
+        setError('Please log in to save your portfolio.');
+        return;
+      }
+
+      const networthCollectionRef = collection(db, `users/${user.uid}/networthData`);
+      await addDoc(networthCollectionRef, initialData);
+
+      setShowCelebration(true);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Error saving to Firestore:', error);
+      setError('Failed to save portfolio. Please try again.');
+    }
   };
 
   const fieldVariants = {
@@ -151,6 +175,16 @@ const Onboarding = ({ onComplete }) => {
             }}>
               Let's set up your portfolio 🚀
             </Typography>
+
+            {error && (
+              <Typography sx={{
+                color: '#EF4444',
+                mb: 2,
+                textAlign: 'center',
+              }}>
+                {error}
+              </Typography>
+            )}
 
             <Typography sx={{
               color: 'rgba(255, 255, 255, 0.8)',
