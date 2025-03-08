@@ -10,7 +10,7 @@ import {
   AppBar,
   Toolbar,
   Modal,
-  TextField, // Added TextField import
+  TextField,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +37,7 @@ const NetWorthDashboard = () => {
   const [openGoalModal, setOpenGoalModal] = useState(false);
   const [goal, setGoal] = useState(() => {
     const savedGoal = localStorage.getItem('networthGoal');
+    console.log('Initial goal from localStorage:', savedGoal);
     return savedGoal ? parseFloat(savedGoal) : 0;
   });
 
@@ -77,15 +78,16 @@ const NetWorthDashboard = () => {
     const goalValue = parseFloat(e.target.goal.value) || 0;
     if (goalValue > 0) {
       setGoal(goalValue);
-      localStorage.setItem('networthGoal', goalValue);
+      localStorage.setItem('networthGoal', goalValue.toString());
+      console.log('Goal set to:', goalValue);
     }
     setOpenGoalModal(false);
   };
 
   const latestData = networthData[networthData.length - 1] || {};
   const totalNetWorth = latestData.networth || 0;
-  const progress = goal > 0 ? (totalNetWorth / goal) * 100 : 0;
-  const remaining = goal > 0 ? goal - totalNetWorth : 0;
+  const progress = goal > 0 ? Math.min((totalNetWorth / goal) * 100, 100) : 0;
+  const remaining = goal > 0 ? Math.max(goal - totalNetWorth, 0) : 0;
 
   const assetData = [
     { name: 'Stocks', value: latestData.stocks || 0 },
@@ -231,43 +233,96 @@ const NetWorthDashboard = () => {
               ₹{totalNetWorth.toLocaleString()}
             </Typography>
             {goal > 0 && (
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(progress, 100)}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                style={{
-                  height: '20px',
-                  background: 'linear-gradient(90deg, #7C3AED 0%, #EC4899 100%)',
-                  borderRadius: '10px',
-                  marginTop: '1rem',
-                  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
-                }}
-              >
-                <Box
-                  sx={{
-                    height: '100%',
-                    background: '#2A3852',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                  }}
-                >
-                  <Typography
-                    sx={{
+              <Box sx={{ mt: 3, maxWidth: 600, mx: 'auto' }}>
+                <Typography sx={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                  mb: 1,
+                }}>
+                  Goal Progress
+                </Typography>
+                <Typography sx={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '1rem',
+                  mb: 2,
+                }}>
+                  ₹{totalNetWorth.toLocaleString()} of ₹{goal.toLocaleString()} target
+                </Typography>
+                <Box sx={{ position: 'relative', height: '20px', background: '#2A3852', borderRadius: '10px' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    style={{
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #7C3AED 0%, #EC4899 100%)',
+                      borderRadius: '10px',
                       position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      color: '#FFFFFF',
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      textShadow: '0 1px 3px rgba(0, 0, 0, 0.5)',
+                      top: 0,
+                      left: 0,
+                    }}
+                  />
+                  {/* Circular Indicator */}
+                  <motion.div
+                    initial={{ left: '0%' }}
+                    animate={{ left: `calc(${progress}% - 15px)` }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    style={{
+                      position: 'absolute',
+                      top: '-5px',
+                      width: '30px',
+                      height: '30px',
+                      background: 'linear-gradient(90deg, #7C3AED 0%, #EC4899 100%)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
                     }}
                   >
-                    {progress.toFixed(1)}% (₹{remaining.toLocaleString()} left)
-                  </Typography>
+                    <Typography sx={{
+                      color: '#FFFFFF',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                    }}>
+                      {progress.toFixed(0)}%
+                    </Typography>
+                  </motion.div>
+                  {/* Percentage Markers */}
+                  {[0, 25, 50, 75, 100].map((percent) => (
+                    <Box
+                      key={percent}
+                      sx={{
+                        position: 'absolute',
+                        left: `${percent}%`,
+                        top: '30px',
+                        transform: 'translateX(-50%)',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: '10px',
+                          height: '10px',
+                          background: percent <= progress ? 'linear-gradient(90deg, #7C3AED 0%, #EC4899 100%)' : '#FFFFFF',
+                          borderRadius: '50%',
+                          position: 'absolute',
+                          top: '-35px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                        }}
+                      />
+                      <Typography sx={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        fontSize: '0.8rem',
+                      }}>
+                        {percent}%
+                      </Typography>
+                    </Box>
+                  ))}
                 </Box>
-              </motion.div>
+              </Box>
             )}
           </Box>
 
@@ -335,7 +390,7 @@ const NetWorthDashboard = () => {
                   }}
                 >
                   <Typography sx={{
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    color: 'rgba(255, 255, 252, 0.9)',
                     fontSize: '1.2rem',
                     fontWeight: 500,
                     mb: 2,
