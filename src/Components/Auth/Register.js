@@ -9,7 +9,6 @@ import {
   CircularProgress
 } from '@mui/material';
 import { useAuth } from '../AuthContext';
-import { authModalStyles } from '../../theme/authModalStyles';
 import { useNavigate } from 'react-router-dom';
 
 export default function Register({ onToggleAuth }) {
@@ -23,28 +22,36 @@ export default function Register({ onToggleAuth }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    console.log('handleSubmit triggered with form data:', { email, password, confirmPassword }); // Debug
 
     if (password !== confirmPassword) {
+      console.log('Password mismatch detected'); // Debug
       return setError('Passwords do not match');
     }
 
     if (password.length < 6) {
+      console.log('Password too short detected'); // Debug
       return setError('Password should be at least 6 characters');
     }
 
     try {
       setError('');
       setLoading(true);
-      await signup(email, password);
+      console.log('Initiating signup with:', { email, password }); // Debug
+      const user = await signup(email, password);
+      console.log('Signup completed for user:', user.uid); // Debug
+      console.log('Navigating to /onboarding'); // Debug
       navigate('/onboarding');
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Registration error:', error.code, error.message);
       setError(
         error.code === 'auth/email-already-in-use'
           ? 'Email is already registered'
-          : error.code === 'auth/invalid-email'
+        : error.code === 'auth/invalid-email'
           ? 'Invalid email address'
-          : 'Failed to create account. Please try again.'
+        : error.code === 'auth/weak-password'
+          ? 'Password is too weak'
+        : 'Failed to register. Please try again.'
       );
     } finally {
       setLoading(false);
