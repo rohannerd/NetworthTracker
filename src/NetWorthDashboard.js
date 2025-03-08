@@ -24,9 +24,12 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  PieChart,
-  Pie,
-  Cell,
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  PieChart,  // Added
+  Pie,      // Added
+  Cell,     // Added
 } from 'recharts';
 
 const NetWorthDashboard = () => {
@@ -40,6 +43,20 @@ const NetWorthDashboard = () => {
     console.log('Initial goal from localStorage:', savedGoal);
     return savedGoal ? parseFloat(savedGoal) : 0;
   });
+
+  // Calculate dynamic Y-axis ticks based on networthData
+  const getDynamicTicks = (data) => {
+    if (!data.length) return [0];
+    const maxNetWorth = Math.max(...data.map(entry => entry.networth || 0));
+    const minNetWorth = Math.min(...data.map(entry => entry.networth || 0));
+    const range = maxNetWorth - minNetWorth;
+    const step = Math.pow(10, Math.floor(Math.log10(range / 5))) || 1000; // Dynamic step size (e.g., 1000, 100)
+    const ticks = [];
+    for (let i = 0; i <= Math.ceil(maxNetWorth / step); i++) {
+      ticks.push(i * step);
+    }
+    return ticks;
+  };
 
   useEffect(() => {
     const savedData = localStorage.getItem('networthData');
@@ -102,9 +119,11 @@ const NetWorthDashboard = () => {
   const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6'];
 
   const chartData = networthData.map((entry, index) => ({
-    date: `Day ${index + 1}`,
+    date: new Date(entry.date).toLocaleDateString(),
     networth: entry.networth,
   }));
+
+  const dynamicTicks = getDynamicTicks(networthData);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -390,55 +409,64 @@ const NetWorthDashboard = () => {
                   }}
                 >
                   <Typography sx={{
-                    color: 'rgba(255, 255, 252, 0.9)',
+                    color: 'rgba(255, 255, 255, 0.9)',
                     fontSize: '1.2rem',
                     fontWeight: 500,
                     mb: 2,
                   }}>
                     Net Worth Trend
                   </Typography>
-                  <LineChart
-                    width={500}
-                    height={300}
-                    data={chartData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                    <XAxis
-                      dataKey="date"
-                      stroke="rgba(255, 255, 255, 0.5)"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      stroke="rgba(255, 255, 255, 0.5)"
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#2A3852',
-                        border: 'none',
-                        borderRadius: '8px',
-                        color: '#FFFFFF',
-                      }}
-                      itemStyle={{ color: '#FFFFFF' }}
-                    />
-                    <Legend wrapperStyle={{ color: '#FFFFFF' }} />
-                    <Line
-                      type="monotone"
-                      dataKey="networth"
-                      stroke="url(#netWorthGradient)"
-                      strokeWidth={2}
-                      dot={{ fill: '#7C3AED', stroke: '#FFFFFF', strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6 }}
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart
+                      data={chartData}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
                     >
-                      <defs>
-                        <linearGradient id="netWorthGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#7C3AED" />
-                          <stop offset="100%" stopColor="#EC4899" />
-                        </linearGradient>
-                      </defs>
-                    </Line>
-                  </LineChart>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                      <XAxis
+                        dataKey="date"
+                        stroke="rgba(255, 255, 255, 0.5)"
+                        tick={{ fontSize: 12, angle: -45, textAnchor: 'end' }}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis
+                        stroke="rgba(255, 255, 255, 0.5)"
+                        tick={{ fontSize: 12 }}
+                        domain={[0, (dataMax) => Math.ceil(dataMax * 1.1)]} // Add 10% buffer
+                        ticks={dynamicTicks}
+                        label={{
+                          value: 'Net Worth (₹)',
+                          angle: -90,
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fill: 'rgba(255, 255, 255, 0.7)' },
+                        }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#2A3852',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: '#FFFFFF',
+                        }}
+                        itemStyle={{ color: '#FFFFFF' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="networth"
+                        stroke="url(#netWorthGradient)"
+                        fill="url(#netWorthGradient)"
+                        fillOpacity={0.3}
+                        strokeWidth={2}
+                        dot={{ fill: '#7C3AED', stroke: '#FFFFFF', strokeWidth: 2, r: 5 }}
+                      >
+                        <defs>
+                          <linearGradient id="netWorthGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#7C3AED" />
+                            <stop offset="100%" stopColor="#EC4899" />
+                          </linearGradient>
+                        </defs>
+                      </Area>
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </Card>
               </motion.div>
             </Grid>
@@ -466,37 +494,39 @@ const NetWorthDashboard = () => {
                   }}>
                     Asset Distribution
                   </Typography>
-                  <PieChart width={500} height={300}>
-                    <Pie
-                      data={assetData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : null
-                      }
-                      labelStyle={{ fill: '#FFFFFF', fontSize: 12 }}
-                    >
-                      {assetData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#2A3852',
-                        border: 'none',
-                        borderRadius: '8px',
-                        color: '#FFFFFF',
-                      }}
-                      itemStyle={{ color: '#FFFFFF' }}
-                    />
-                  </PieChart>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={assetData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                        labelLine={false}
+                        label={({ name, percent }) =>
+                          percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : null
+                        }
+                        labelStyle={{ fill: '#FFFFFF', fontSize: 12 }}
+                      >
+                        {assetData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#2A3852',
+                          border: 'none',
+                          borderRadius: '8px',
+                          color: '#FFFFFF',
+                        }}
+                        itemStyle={{ color: '#FFFFFF' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </Card>
               </motion.div>
             </Grid>
