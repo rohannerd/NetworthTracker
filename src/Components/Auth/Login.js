@@ -8,11 +8,12 @@ import {
   Box,
   InputAdornment,
   IconButton,
-  Alert
+  Alert,
 } from '@mui/material';
 import { Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../AuthContext';
+import { authModalStyles } from '../../theme/authModalStyles.js'; // Corrected path
 
 export default function Login({ isOpen, onClose, onToggleAuth }) {
   const { login } = useAuth();
@@ -46,19 +47,19 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
         backdrop: {
           sx: {
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            backdropFilter: 'blur(12px)'
-          }
-        }
+            backdropFilter: 'blur(12px)',
+          },
+        },
       }}
       PaperProps={{
         sx: {
-          backgroundColor: '#2A3852',
+          background: 'linear-gradient(135deg, #1E293B, #2A3852)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           borderRadius: '24px',
           boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.8)',
-          p: 3
-        }
+          p: 3,
+        },
       }}
     >
       <DialogContent>
@@ -75,34 +76,34 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
                 right: -8,
                 top: -8,
                 color: 'rgba(255, 255, 255, 0.5)',
-                '&:hover': { color: 'white' }
+                '&:hover': { color: 'white' },
               }}
             >
               <X size={20} />
             </IconButton>
-            
+
             <Typography variant="h5" sx={{
               fontWeight: 700,
               background: 'linear-gradient(to right, #fff, #a9c2ff)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              mb: 1
+              mb: 1,
             }}>
               Welcome back
             </Typography>
-            
+
             <Typography sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
               Sign in to access your dashboard
             </Typography>
           </Box>
 
           {error && (
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: 3, 
+            <Alert
+              severity="error"
+              sx={{
+                mb: 3,
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#EF4444'
+                color: '#EF4444',
               }}
             >
               {error}
@@ -115,40 +116,13 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              sx={{
-                mb: 2,
-                '& .MuiOutlinedInput-root': {
-                  height: '48px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)', // Increased opacity
-                  border: '1px solid rgba(255, 255, 255, 0.4)', // More visible border
-                  borderRadius: '8px',
-                  '& fieldset': {
-                    border: 'none'
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.25)'
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    border: '2px solid #7C3AED'
-                  }
-                },
-                '& .MuiOutlinedInput-input': {
-                  color: '#fff',
-                  padding: '12px',
-                  paddingLeft: '48px', // Space for icon
-                  '&::placeholder': {
-                    color: 'rgba(255, 255, 255, 0.7)', // More visible placeholder
-                    opacity: 1
-                  }
-                }
-              }}
+              sx={{ mb: 2, ...authModalStyles.textField }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start" sx={{ ml: 1.5 }}>
-                    <Mail size={20} style={{ color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <Mail size={20} style={{ color: 'rgba(255, 255, 255, 0.8)' }} />
                   </InputAdornment>
-                )
+                ),
               }}
             />
 
@@ -158,38 +132,11 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              sx={{
-                mb: 3,
-                '& .MuiOutlinedInput-root': {
-                  height: '48px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)', // Increased opacity
-                  border: '1px solid rgba(255, 255, 255, 0.4)', // More visible border
-                  borderRadius: '8px',
-                  '& fieldset': {
-                    border: 'none'
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.25)'
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    border: '2px solid #7C3AED'
-                  }
-                },
-                '& .MuiOutlinedInput-input': {
-                  color: '#fff',
-                  padding: '12px',
-                  paddingLeft: '48px', // Space for icon
-                  '&::placeholder': {
-                    color: 'rgba(255, 255, 255, 0.7)', // More visible placeholder
-                    opacity: 1
-                  }
-                }
-              }}
+              sx={{ mb: 3, ...authModalStyles.textField }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start" sx={{ ml: 1.5 }}>
-                    <Lock size={20} style={{ color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <Lock size={20} style={{ color: 'rgba(255, 255, 255, 0.8)' }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -197,10 +144,10 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
                     <IconButton
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
-                      sx={{ 
-                        color: 'rgba(255, 255, 255, 0.7)',
+                      sx={{
+                        color: 'rgba(255, 255, 255, 0.8)',
                         mr: 0.5,
-                        '&:hover': { color: 'white' }
+                        '&:hover': { color: 'white' },
                       }}
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -226,8 +173,8 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
                 '&:hover': {
                   background: 'linear-gradient(45deg, #6D28D9 30%, #DB2777 90%)',
                   boxShadow: '0 6px 16px rgba(124, 58, 237, 0.4)',
-                  transform: 'translateY(-1px)'
-                }
+                  transform: 'translateY(-1px)',
+                },
               }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
@@ -240,7 +187,7 @@ export default function Login({ isOpen, onClose, onToggleAuth }) {
               sx={{
                 color: 'rgba(255, 255, 255, 0.7)',
                 textTransform: 'none',
-                '&:hover': { color: 'white' }
+                '&:hover': { color: 'white' },
               }}
             >
               Don't have an account? Sign up

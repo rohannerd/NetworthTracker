@@ -8,12 +8,13 @@ import {
   Box,
   InputAdornment,
   IconButton,
-  Alert
+  Alert,
 } from '@mui/material';
 import { Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { authModalStyles } from '../../theme/authModalStyles.js'; // Corrected path
 
 export default function AuthModal() {
   const { authModalOpen, authMode, closeAuthModal, login, signup } = useAuth();
@@ -42,12 +43,10 @@ export default function AuthModal() {
         }
         await signup(email, password);
         closeAuthModal();
-        // New users always go to onboarding
         navigate('/onboarding');
       } else {
         await login(email, password);
         closeAuthModal();
-        // Existing users: check if they have data
         const hasData = checkUserData();
         navigate(hasData ? '/dashboard' : '/onboarding');
       }
@@ -66,13 +65,9 @@ export default function AuthModal() {
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: 'rgba(15, 23, 42, 0.98)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '16px',
-          boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.5)',
-          overflow: 'visible'
-        }
+          ...authModalStyles.dialog['& .MuiDialog-paper'],
+          background: 'linear-gradient(135deg, #1E293B, #2A3852)',
+        },
       }}
     >
       <DialogContent sx={{ p: 0 }}>
@@ -89,7 +84,7 @@ export default function AuthModal() {
                 right: 16,
                 top: 16,
                 color: 'rgba(255, 255, 255, 0.5)',
-                '&:hover': { color: 'white' }
+                '&:hover': { color: 'white' },
               }}
             >
               <X size={20} />
@@ -100,7 +95,7 @@ export default function AuthModal() {
               fontWeight: 700,
               background: 'linear-gradient(to right, #fff, #94a3b8)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              WebkitTextFillColor: 'transparent',
             }}>
               {authMode === 'login' ? 'Welcome back' : 'Create your account'}
             </Typography>
@@ -115,7 +110,7 @@ export default function AuthModal() {
               <Alert severity="error" sx={{
                 mb: 3,
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#EF4444'
+                color: '#EF4444',
               }}>
                 {error}
               </Alert>
@@ -128,7 +123,7 @@ export default function AuthModal() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, ...authModalStyles.textField }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -144,7 +139,7 @@ export default function AuthModal() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                sx={{ mb: authMode === 'signup' ? 2 : 3 }}
+                sx={{ mb: authMode === 'signup' ? 2 : 3, ...authModalStyles.textField }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -168,7 +163,7 @@ export default function AuthModal() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 3, ...authModalStyles.textField }}
                 />
               )}
 
@@ -183,8 +178,10 @@ export default function AuthModal() {
                   fontSize: '1rem',
                   textTransform: 'none',
                   '&:hover': {
-                    background: 'linear-gradient(45deg, #6D28D9 30%, #DB2777 90%)'
-                  }
+                    background: 'linear-gradient(45deg, #6D28D9 30%, #DB2777 90%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
+                  },
                 }}
               >
                 {authMode === 'login' ? 'Sign In' : 'Create Account'}
