@@ -174,83 +174,99 @@ const NetWorthDashboard = () => {
       background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
       py: 8,
     }}>
-      <AppBar
-        position="fixed"
-        elevation={0}
+      // src/Components/NetWorthDashboard.js (AppBar section only)
+<AppBar
+  position="fixed"
+  elevation={0}
+  sx={{
+    background: 'rgba(5, 14, 29, 0.8)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+  }}
+>
+  <Toolbar sx={{ 
+    justifyContent: 'space-between', 
+    px: { xs: 1, sm: 2, md: 6 }, // Reduced padding for mobile
+    overflowX: 'hidden', // Prevent horizontal overflow
+  }}>
+    <Typography variant="h6" sx={{
+      fontWeight: 700,
+      letterSpacing: '-0.5px',
+      fontSize: { xs: '1.2rem', sm: '1.5rem' }, // Responsive font size
+    }}>
+      WealthTrack
+    </Typography>
+    <Box sx={{ 
+      display: 'flex', 
+      gap: { xs: 0.5, sm: 1 }, // Reduced gap for mobile
+      alignItems: 'center',
+    }}>
+      <Button
+        variant="contained"
+        onClick={handleAddNewData}
+        size="small"
         sx={{
-          background: 'rgba(5, 14, 29, 0.8)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'linear-gradient(45deg, #7C3AED 30%, #EC4899 90%)',
+          py: { xs: 0.5, sm: 1 },
+          px: { xs: 1, sm: 2.5 },
+          textTransform: 'none',
+          fontSize: { xs: '0.7rem', sm: '0.9rem' },
+          fontWeight: 500,
+          minWidth: { xs: '70px', sm: '100px' }, // Smaller minWidth for mobile
+          '&:hover': {
+            background: 'linear-gradient(45deg, #6D28D9 30%, #DB2777 90%)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
+          },
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 6 } }}>
-          <Typography variant="h6" sx={{
-            fontWeight: 700,
-            letterSpacing: '-0.5px',
-          }}>
-            WealthTrack
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="contained"
-              onClick={handleAddNewData}
-              sx={{
-                background: 'linear-gradient(45deg, #7C3AED 30%, #EC4899 90%)',
-                py: 1,
-                px: 2.5,
-                textTransform: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #6D28D9 30%, #DB2777 90%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
-                },
-              }}
-            >
-              Add New Data
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => setOpenGoalModal(true)}
-              sx={{
-                background: 'linear-gradient(45deg, #4CAF50 30%, #81C784 90%)',
-                py: 1,
-                px: 2.5,
-                textTransform: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #388E3C 30%, #66BB6A 90%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                },
-              }}
-            >
-              Set Goal
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleLogout}
-              sx={{
-                color: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-                py: 1,
-                px: 2.5,
-                textTransform: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                },
-              }}
-            >
-              Logout
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+        Add New Data
+      </Button>
+      <Button
+        variant="contained"
+        onClick={() => setOpenGoalModal(true)}
+        size="small"
+        sx={{
+          background: 'linear-gradient(45deg, #4CAF50 30%, #81C784 90%)',
+          py: { xs: 0.5, sm: 1 },
+          px: { xs: 1, sm: 2.5 },
+          textTransform: 'none',
+          fontSize: { xs: '0.7rem', sm: '0.9rem' },
+          fontWeight: 500,
+          minWidth: { xs: '70px', sm: '100px' },
+          '&:hover': {
+            background: 'linear-gradient(45deg, #388E3C 30%, #66BB6A 90%)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+          },
+        }}
+      >
+        Set Goal
+      </Button>
+      <Button
+        variant="outlined"
+        onClick={handleLogout}
+        size="small"
+        sx={{
+          color: 'white',
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          py: { xs: 0.5, sm: 1 },
+          px: { xs: 1, sm: 2.5 },
+          textTransform: 'none',
+          fontSize: { xs: '0.7rem', sm: '0.9rem' },
+          fontWeight: 500,
+          minWidth: { xs: '70px', sm: '100px' },
+          '&:hover': {
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(255, 255, 255, 0.3)',
+          },
+        }}
+      >
+        Logout
+      </Button>
+    </Box>
+  </Toolbar>
+</AppBar>
 
       <Container maxWidth="lg" sx={{ mt: 10 }}>
         {error && (
