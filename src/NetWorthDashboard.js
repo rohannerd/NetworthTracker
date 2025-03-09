@@ -174,7 +174,7 @@ const NetWorthDashboard = () => {
       background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
       py: 8,
     }}>
-      // src/Components/NetWorthDashboard.js (AppBar section only)
+     
 <AppBar
   position="fixed"
   elevation={0}

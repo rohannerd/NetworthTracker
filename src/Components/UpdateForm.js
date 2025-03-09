@@ -1,3 +1,4 @@
+// src/Components/UpdateForm.js
 import React, { useState } from 'react';
 import {
   Box,
@@ -61,8 +62,8 @@ const UpdateForm = ({ initialData, onUpdate, onClose }) => {
     >
       <Card
         sx={{
-          p: 4,
-          maxWidth: 500,
+          p: { xs: 1, sm: 2, md: 4 }, // Reduced padding for mobile
+          maxWidth: { xs: '90%', sm: '400px', md: '500px' }, // Full width on mobile, capped on larger screens
           width: '100%',
           background: 'linear-gradient(135deg, #2A3852, #1E293B)',
           backdropFilter: 'blur(10px)',
@@ -71,21 +72,25 @@ const UpdateForm = ({ initialData, onUpdate, onClose }) => {
           boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.5)',
         }}
       >
-        <Typography variant="h5" sx={{
-          mb: 3,
-          background: 'linear-gradient(to right, #fff, #a9c2ff)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          fontWeight: 700,
-          textAlign: 'center',
-        }}>
+        <Typography
+          variant="h5"
+          sx={{
+            mb: { xs: 1, sm: 2, md: 3 },
+            background: 'linear-gradient(to right, #fff, #a9c2ff)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontWeight: 700,
+            textAlign: 'center',
+            fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.5rem' },
+          }}
+        >
           Update Your Portfolio
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1, sm: 2 }}>
             {Object.keys(formData).map((field) => (
-              <Grid item xs={12} sm={6} key={field}>
+              <Grid item xs={12} key={field}>
                 <TextField
                   fullWidth
                   label={field.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
@@ -108,16 +113,18 @@ const UpdateForm = ({ initialData, onUpdate, onClose }) => {
                     },
                     '& .MuiOutlinedInput-input': {
                       color: '#FFFFFF',
+                      fontSize: { xs: '0.9rem', sm: '1rem' },
                     },
                     '& .MuiInputLabel-root': {
                       color: 'rgba(255, 255, 255, 0.9)',
+                      fontSize: { xs: '0.8rem', sm: '0.9rem' },
                     },
                   }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
                         {fieldIcons[field]}
-                        <Typography sx={{ ml: 1, color: 'rgba(255, 255, 255, 0.8)' }}>₹</Typography>
+                        <Typography sx={{ ml: 1, color: 'rgba(255, 255, 255, 0.8)', fontSize: { xs: '0.9rem', sm: '1rem' } }}>₹</Typography>
                       </InputAdornment>
                     ),
                   }}
@@ -128,18 +135,27 @@ const UpdateForm = ({ initialData, onUpdate, onClose }) => {
             ))}
           </Grid>
 
-          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Box
+            sx={{
+              mt: { xs: 1, sm: 2, md: 4 },
+              display: 'flex',
+              gap: { xs: 1, sm: 2 },
+              justifyContent: 'center',
+              flexDirection: { xs: 'column', sm: 'row' }, // Stack on mobile, row on larger screens
+            }}
+          >
             <Button
               variant="outlined"
               onClick={onClose}
               sx={{
                 color: 'white',
                 borderColor: 'rgba(255, 255, 255, 0.2)',
-                py: 1,
-                px: 2.5,
+                py: { xs: 0.5, sm: 1 },
+                px: { xs: 1.5, sm: 2.5 },
                 textTransform: 'none',
-                fontSize: '1rem',
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 fontWeight: 500,
+                width: { xs: '100%', sm: 'auto' }, // Full width on mobile
                 '&:hover': {
                   background: 'rgba(255, 255, 255, 0.1)',
                   borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -158,11 +174,12 @@ const UpdateForm = ({ initialData, onUpdate, onClose }) => {
                   transform: 'translateY(-2px)',
                   boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
                 },
-                py: 1,
-                px: 2.5,
+                py: { xs: 0.5, sm: 1 },
+                px: { xs: 1.5, sm: 2.5 },
                 textTransform: 'none',
-                fontSize: '1rem',
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 fontWeight: 600,
+                width: { xs: '100%', sm: 'auto' }, // Full width on mobile
               }}
             >
               Update
